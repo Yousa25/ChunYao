@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的专属歌单 - 增强版</title>
+    <!-- 引入 SheetJS 库用于解析 Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #5d4037;
+            --bg: #fdfbf7;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: var(--bg);
+            color: #333;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 标题区 */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        /* 操作区 */
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: center;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-width: 200px;
+        }
+
+        select,
+        button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            background: white;
+        }
+
+        /* 按钮样式 */
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-add:hover {
+            background: #4e342e;
+        }
+
+        .btn-green {
+            background: #2e7d32;
+            color: white;
+            border: none;
+        }
+
+        .btn-brown {
+            background: #5d4037;
+            color: white;
+            border: none;
+        }
+
+        .btn-gray {
+            background: #78909c;
+            color: white;
+            border: none;
+        }
+
+        /* 隐藏的文件上传输入框 */
+        #fileInput {
+            display: none;
+        }
+
+        /* 列表区 */
+        .song-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .song-item {
+            background: var(--card-bg);
+            border-bottom: 1px solid #eee;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+
+        .song-item:hover {
+            background: #f9f9f9;
+            transform: translateX(5px);
+        }
+
+        .song-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tag {
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .tag-古风 {
+            background-color: #d87c56;
+        }
+
+        .tag-流行 {
+            background-color: #66bb6a;
+        }
+
+        .tag-小甜歌 {
+            background-color: #ab47bc;
+        }
+
+
+        .btn-del {
+            color: #ef5350;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+        }
+
+        .btn-del:hover {
+            color: #c62828;
+        }
+
+        /* 统计 */
+        .stats {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🎵 小椿遥专属歌单</h1>
+    </header>
+
+    <!-- 添加歌曲区域 -->
+    <div class="controls">
+        <input type="text" id="newSongName" placeholder="输入歌曲名称...">
+        <select id="newSongCategory">
+            <option value="古风">古风</option>
+            <option value="流行">流行</option>
+            <option value="小甜歌">小甜歌</option>
+        </select>
+        <button class="btn-add" onclick="addSong()">＋ 添加</button>
+    </div>
+
+    <!-- 工具栏区域 -->
+    <div class="controls">
+        <select id="filterCategory" onchange="renderList()">
+            <option value="all">全部分类</option>
+            <option value="古风">古风</option>
+            <option value="流行">流行</option>
+            <option value="小甜歌">小甜歌</option>
+        </select>
+
+        <select id="sortMethod" onchange="renderList()">
+            <option value="az">按 A-Z 排序</option>
+            <option value="za">按 Z-A 排序</option>
+            <option value="random">随机洗牌</option>
+            <option value="group">按分类分组</option>
+        </select>
+
+        <!-- 隐藏的文件上传控件 -->
+        <input type="file" id="fileInput" accept=".xlsx, .xls" onchange="handleFileUpload(this)">
+
+        <button class="btn-green" onclick="document.getElementById('fileInput').click()">📤 上传 Excel</button>
+        <button class="btn-brown" onclick="exportToExcel()">📥 导出 Excel</button>
+        <button class="btn-gray" onclick="resetData()">🔄 重置数据</button>
+    </div>
+
+    <div class="stats" id="stats">共 0 首歌曲</div>
+    <ul class="song-list" id="songList"></ul>
+
+    <script>
+        // 初始化数据
+        let songs = JSON.parse(localStorage.getItem('mySongs')) || [
+            { name: "赤伶", category: "古风" },
+            { name: "起风了", category: "流行" },
+            { name: "勾指起誓", category: "小甜歌" }
+        ];
+
+        // 渲染列表
+        function renderList() {
+            const listEl = document.getElementById('songList');
+            const filter = document.getElementById('filterCategory').value;
+            const sort = document.getElementById('sortMethod').value;
+
+            listEl.innerHTML = '';
+
+            // 1. 筛选
+            let displaySongs = songs.filter(s => filter === 'all' || s.category === filter);
+
+            // 2. 排序
+            if (sort === 'az') {
+                displaySongs.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+            } else if (sort === 'za') {
+                displaySongs.sort((a, b) => b.name.localeCompare(a.name, 'zh'));
+            } else if (sort === 'random') {
+                displaySongs.sort(() => Math.random() - 0.5);
+            } else if (sort === 'group') {
+                // 分组排序逻辑：先按分类排，再按名字排
+                const order = { "古风": 1, "流行": 2, "兔兔歌单": 3 };
+                displaySongs.sort((a, b) => {
+                    if (order[a.category] !== order[b.category]) {
+                        return order[a.category] - order[b.category];
+                    }
+                    return a.name.localeCompare(b.name, 'zh');
+                });
+            }
+
+            // 3. 生成 HTML
+            displaySongs.forEach((song, index) => {
+                const li = document.createElement('li');
+                li.className = 'song-item';
+                // 找到该歌曲在原数组中的索引，以便删除
+                const originalIndex = songs.indexOf(song);
+
+                li.innerHTML = `
+                <div class="song-info">
+                    <span class="tag tag-${song.category.replace(/\s/g, '')}">${song.category}</span>
+                    <strong>${song.name}</strong>
+                </div>
+                <button class="btn-del" onclick="deleteSong(${originalIndex})">×</button>
+            `;
+                listEl.appendChild(li);
+            });
+
+            document.getElementById('stats').innerText = `共 ${displaySongs.length} 首歌曲`;
+        }
+
+        // 添加歌曲
+        function addSong() {
+            const nameInput = document.getElementById('newSongName');
+            const catInput = document.getElementById('newSongCategory');
+            const name = nameInput.value.trim();
+
+            if (name) {
+                songs.push({ name: name, category: catInput.value });
+                saveAndRender();
+                nameInput.value = '';
+            } else {
+                alert("请输入歌曲名称");
+            }
+        }
+
+        // 删除歌曲
+        function deleteSong(index) {
+            if (confirm('确定删除这首歌吗？')) {
+                songs.splice(index, 1);
+                saveAndRender();
+            }
+        }
+
+        // 保存并刷新
+        function saveAndRender() {
+            localStorage.setItem('mySongs', JSON.stringify(songs));
+            renderList();
+        }
+
+        // 重置数据
+        function resetData() {
+            if (confirm("确定要清空所有数据并恢复默认吗？")) {
+                localStorage.removeItem('mySongs');
+                location.reload();
+            }
+        }
+
+        // --- 核心功能：上传 Excel ---
+        function handleFileUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // 获取第一个工作表
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // 将工作表转换为 JSON 对象数组
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                let addedCount = 0;
+
+                jsonData.forEach(row => {
+                    // 智能识别列名（支持：歌曲/歌名/名称，分类/类型）
+                    let songName = row['歌曲'] || row['歌名'] || row['名称'] || row['Name'];
+                    let category = row['分类'] || row['类型'] || row['Category'] || '未分类';
+
+                    if (songName) {
+                        // 简单的去重检查
+                        const exists = songs.some(s => s.name === songName && s.category === category);
+                        if (!exists) {
+                            songs.push({ name: songName, category: category });
+                            addedCount++;
+                        }
+                    }
+                });
+
+                saveAndRender();
+                alert(`成功导入 ${addedCount} 首新歌！`);
+
+                // 清空 input 防止重复上传同一文件不触发 onchange
+                input.value = '';
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // --- 核心功能：导出 Excel ---
+        function exportToExcel() {
+            // 准备数据，使用与导入功能匹配的列名：'歌名' 和 '分类'
+            const dataToExport = songs.map((s, i) => ({
+                "歌名": s.name,
+                "分类": s.category
+            }));
+
+            // 创建工作簿
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "我的歌单");
+
+            // 下载文件
+            XLSX.writeFile(wb, "我的专属歌单.xlsx");
+        }
+
+        // 页面加载时渲染
+        renderList();
+    </script>
+
+</body>
+
+</html>
