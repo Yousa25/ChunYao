@@ -215,11 +215,140 @@
 
     <script>
         // 初始化数据
-        let songs = JSON.parse(localStorage.getItem('mySongs')) || [
-            { name: "赤伶", category: "古风" },
-            { name: "起风了", category: "流行" },
-            { name: "勾指起誓", category: "小甜歌" }
-        ];
+let songs = JSON.parse(localStorage.getItem('mySongs')) || [
+    // 🔠 A
+    { name: "Always Online", category: "流行" },
+    { name: "阿拉斯加海湾", category: "流行" },
+    { name: "爱你", category: "小甜歌" },
+    { name: "爱的供养", category: "流行" },
+    { name: "爱情闯进门", category: "流行" },
+    // 🔠 B
+    { name: "不分手的恋爱", category: "流行" },
+    { name: "不问别离", category: "古风" },
+    { name: "不怕", category: "流行" },
+    { name: "不朽之罪", category: "古风" },
+    // 🔠 C
+    { name: "蠢货", category: "流行" },
+    { name: "凑热闹", category: "流行" },
+    { name: "潮汐", category: "流行" },
+    { name: "猜不透", category: "流行" },
+    // 🔠 D
+    { name: "东西", category: "流行" },
+    { name: "东京不太热", category: "流行" },
+    { name: "当你", category: "流行" },
+    { name: "带我走", category: "流行" },
+    { name: "第二杯半价", category: "流行" },
+    { name: "堕", category: "流行" },
+    { name: "冻结", category: "流行" },
+    // 🔠 F
+    { name: "分手的距离", category: "流行" },
+    { name: "飞机场", category: "流行" },
+    { name: "非酋", category: "流行" },
+    { name: "浮生未歇", category: "古风" },
+    { name: "芳华慢", category: "古风" },
+    // 🔠 G
+    { name: "干物女", category: "流行" },
+    { name: "勾指起誓", category: "ACG特典" },
+    { name: "告白气球", category: "流行" },
+    { name: "故梦", category: "古风" },
+    { name: "给我个理由忘记", category: "流行" },
+    // 🔠 H
+    { name: "海绵宝宝", category: "流行" },
+    { name: "好想你", category: "小甜歌" },
+    { name: "坏女孩", category: "流行" },
+    { name: "化身孤岛的鲸", category: "流行" },
+    { name: "红装", category: "流行" },
+    { name: "红昭愿", category: "国风" },
+    { name: "画中仙", category: "流行" },
+    // 🔠 J
+    { name: "江南", category: "流行" },
+    { name: "99次我爱他", category: "小甜歌" },
+    { name: "寄明月", category: "国风" },
+    { name: "尽头", category: "流行" },
+    { name: "9420", category: "流行" },
+    // 🔠 K
+    { name: "客官不可以", category: "流行" },
+    { name: "空山新雨后", category: "国风" },
+    // 🔠 L
+    { name: "浪人琵琶", category: "古风" },
+    { name: "旅行的意义", category: "流行" },
+    { name: "恋爱告急", category: "流行" },
+    { name: "淋雨一直走", category: "流行" },
+    { name: "六月的雨", category: "流行" },
+    { name: "love love", category: "流行" },
+    // 🔠 M
+    { name: "目及皆是你", category: "流行" },
+    { name: "明明就", category: "流行" },
+    { name: "明明说好不哭", category: "流行" },
+    { name: "明天，你好", category: "流行" },
+    // 🔠 N
+    { name: "暖暖", category: "小甜歌" },
+    { name: "暖心", category: "小甜歌" },
+    { name: "年轮", category: "流行" },
+    { name: "虐心", category: "流行" },
+    // 🔠 P
+    { name: "偏爱", category: "流行" },
+    // 🔠 Q
+    { name: "晴天", category: "流行" },
+    { name: "青花瓷", category: "流行" },
+    { name: "七秒钟的记忆", category: "流行" },
+    { name: "牵丝戏", category: "古风雅韵" },
+    { name: "情花", category: "流行" },
+    { name: "情深深雨蒙蒙", category: "流行" },
+    { name: "千年泪", category: "流行" },
+    // 🔠 R
+    { name: "日不落", category: "流行" },
+    { name: "如果可以", category: "流行" },
+    { name: "如果爱忘了", category: "流行" },
+    { name: "入戏太深", category: "流行" },
+    // 🔠 S
+    { name: "舍得", category: "流行" },
+    { name: "拾忆", category: "流行" },
+    { name: "瞬", category: "流行" },
+    { name: "霜雪千年", category: "古风雅韵" },
+    { name: "素颜", category: "流行" },
+    { name: "神的随波逐流", category: "ACG特典" },
+    { name: "山花寻海树", category: "古风雅韵" },
+    { name: "舍得", category: "流行" },
+    // 🔠 T
+    { name: "特别的人", category: "流行" },
+    { name: "跳楼机", category: "流行" },
+    { name: "天若有情", category: "流行" },
+    { name: "天后", category: "流行" },
+    { name: "褪黑素", category: "流行" },
+    { name: "棠梨煎雪", category: "古风雅韵" },
+    { name: "太聪明", category: "流行" },
+    // 🔠 W
+    { name: "我们", category: "流行" },
+    { name: "我又初恋了", category: "流行" },
+    { name: "无颜女", category: "流行" },
+    // 🔠 X
+    { name: "小酒窝", category: "小甜歌" },
+    { name: "像晴天像雨天", category: "流行" },
+    { name: "心墙", category: "流行" },
+    { name: "下一个天亮", category: "流行" },
+    { name: "夏天的风", category: "流行" },
+    { name: "心跳的证明", category: "流行" },
+    { name: "学猫叫", category: "流行" },
+    { name: "写给我第一个喜欢的女孩的歌", category: "流行" },
+    // 🔠 Y
+    { name: "有何不可", category: "流行" },
+    { name: "遇见", category: "流行" },
+    { name: "遇到", category: "流行" },
+    { name: "隐形的翅膀", category: "流行" },
+    { name: "雨爱", category: "流行" },
+    { name: "有你在", category: "流行" },
+    { name: "雨蝶", category: "流行" },
+    { name: "折枝花满衣", category: "流行" },
+    { name: "越长大越孤单", category: "流行" },
+    { name: "一眼万年", category: "流行" },
+    // 🔠 Z
+    { name: "指纹", category: "流行" },
+    // 🎋 古风雅韵
+    { name: "采梦女", category: "古风雅韵" },
+    // 🎮 ACG特典
+    // 🎧 国风
+];
 
         // 渲染列表
         function renderList() {
